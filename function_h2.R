@@ -88,6 +88,8 @@ est.prop.in.tail2 <- function( effect.size, beta, r2, tail=0.01, mu.y=0, sigma.y
     percentile.pushed.to.tail <- vector()
     prop.in.tail <- c(0,0)
     K <- qnorm( tail, lower.tail=FALSE )
+    K.prime = vector()
+    K.prime.rare = vector()
     K.prime[1] = (-K - mu.y)/sigma.y
     K.prime[2] = (K - mu.y)/sigma.y
     K.prime.rare[1] = (-K + beta - mu.y)/sigma.y
