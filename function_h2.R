@@ -84,6 +84,7 @@ est.prop.in.tail <- function( effect.size, beta, r2, tail=0.01 ){
 }
 
 est.prop.in.tail2 <- function( effect.size, beta, r2, tail=0.01, mu.y=0, sigma.y=1 ){
+    r = sqrt(r2)
     percentile.pushed.to.tail <- vector()
     prop.in.tail <- c(0,0)
     K <- qnorm( tail, lower.tail=FALSE )
@@ -91,10 +92,10 @@ est.prop.in.tail2 <- function( effect.size, beta, r2, tail=0.01, mu.y=0, sigma.y
     K.prime[2] = (K - mu.y)/sigma.y
     K.prime.rare[1] = (-K + beta - mu.y)/sigma.y
     K.prime.rare[2] = (K - beta - mu.y)/sigma.y
-    tail = FALSE
     for( i in 1:2 ){
-        m.Y99.rare <- sqrt(r2) * (mu.y + sigma.y*dnorm(K.prime.rare)/pnorm(K.prime.rare,lower.tail=tail)) / sigma.y - mu.y / sigma.y )
-        m.Y99 <- sqrt(r2) * (mu.y + sigma.y*dnorm(K.prime)/pnorm(K.prime,lower.tail=tail)) / sigma.y - mu.y / sigma.y )
+        tail = ifelse( i==1, TRUE, FALSE )
+        m.Y99.rare <- r * dnorm(K.prime.rare)/pnorm(K.prime.rare,lower.tail=tail) - (1 - r) * mu.y / sigma.y )
+        m.Y99 <- r * dnorm(K.prime)/pnorm(K.prime,lower.tail=tail) - (1 - r) * mu.y / sigma.y )
         if( effect.size[i]>0 ){
             prop.in.tail[i] <- effect.size[i] / ( m.Y99 - m.Y99.rare )
         }
