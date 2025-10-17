@@ -96,8 +96,8 @@ est.prop.in.tail2 <- function( effect.size, beta, r2, tail=0.01, mu.y=0, sigma.y
     K.prime.rare[2] = (K - beta - mu.y)/sigma.y
     for( i in 1:2 ){
         tail = ifelse( i==1, TRUE, FALSE )
-        m.Y99.rare <- r * dnorm(K.prime.rare)/pnorm(K.prime.rare,lower.tail=tail) - (1 - r) * mu.y / sigma.y
-        m.Y99 <- r * dnorm(K.prime)/pnorm(K.prime,lower.tail=tail) - (1 - r) * mu.y / sigma.y
+        m.Y99.rare <- r * dnorm( K.prime.rare[i] )/pnorm( K.prime.rare[i], lower.tail=tail ) - (1 - r) * mu.y / sigma.y
+        m.Y99 <- r * dnorm( K.prime[i] )/pnorm( K.prime[i], lower.tail=tail ) - (1 - r) * mu.y / sigma.y
         if( effect.size[i]>0 ){
             prop.in.tail[i] <- effect.size[i] / ( m.Y99 - m.Y99.rare )
         }
