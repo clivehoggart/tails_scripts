@@ -41,7 +41,7 @@ for( i in 1:iter ){
 #    m.yprime <- 0
     fit <- summary(lm( yyy ~ I(prs1) ))
     test <- prs.test( (prs1), yyy )
-    p.in.tail1 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
+    p.in.tail1 <- est.prop.in.tail2( effect.size=test[,'effect'], beta=beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
     ex1 <- h2.rare.big( p.in.tail1, beta=beta.assumed )
 
     fit <- summary(lm( yyy ~ I(prs2) ))
