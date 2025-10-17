@@ -33,31 +33,34 @@ for( i in 1:iter ){
     prs1 <- prs1/sd(prs1)
     prs2 <- prs2/sd(prs2)
 
-#    m.yprime <- mean(yyy[rare.effects1==0 & rare.effects2==0 ])
-    m.yprime <- 0
+    ptr <- which( rare.effects1==0 & rare.effects2==0 )
+    y.prime <- yyy[ptr]
+    mu.y = mean(y.prime)
+    sigma.y = sd(y.prime)
+#    m.yprime <- 0
     fit <- summary(lm( yyy ~ I(prs1) ))
     test <- prs.test( (prs1), yyy )
-    p.in.tail1 <- est.prop.in.tail( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
+    p.in.tail1 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=mu.y )
     ex1 <- h2.rare.big( p.in.tail1, beta=beta.assumed )
 
     fit <- summary(lm( yyy ~ I(prs2) ))
     test <- prs.test( (prs2), yyy )
-    p.in.tail2 <- est.prop.in.tail( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
+    p.in.tail2 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
     ex2 <- h2.rare.big( p.in.tail2, beta=beta.assumed )
 
     fit <- summary(lm( yyy ~ I(prs1+rare.effects1) ))
     test <- prs.test( (prs1+rare.effects1), yyy )
-    p.in.tail3 <- est.prop.in.tail( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
+    p.in.tail3 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
     ex3 <- h2.rare.big( p.in.tail3, beta=beta.assumed )
 
     fit <- summary(lm( yyy ~ I(prs2+rare.effects1) ))
     test <- prs.test( (prs2+rare.effects1), yyy )
-    p.in.tail4 <- est.prop.in.tail( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
+    p.in.tail4 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
     ex4 <- h2.rare.big( p.in.tail4, beta=beta.assumed )
 
 #    print( c( p.in.tail1, p.in.tail2, p.in.tail3, p.in.tail4 ) )
-    print( c( ex1$h2, ex2$h2ex1$h2, ex2$h2, ex3$h2, ex4$h2 ) )
-    h2.est1[i,] <- c( ex1$h2, ex2$h2, ex3$h2, ex4$h2 )
+    print( c( ex1$h2, ex2$h2 ) )
+    h2.est1[i,] <- c( ex1$h2, ex2$h2 )
 }
 print( c( var(rare.effects1), var(rare.effects2), var(rare.effects1)+var(rare.effects2) ) )
 
@@ -69,7 +72,7 @@ y.prime <- yyy[ptr]
 prs.prime <- prs1[ptr]
 
 fit <- summary( lm(prs.prime ~ y.prime ))
-print(fit)
+#print(fit)
 #print( sqrt(fit$r.squared) / sd(y.prime) )
 #print( sqrt(fit$r.squared) * mean(y.prime) / sd(y.prime) )
 
@@ -77,20 +80,20 @@ K = 1
 mu.y = mean(y.prime)
 sigma.y = sd(y.prime)
 K.prime = (K - mu.y)/sigma.y
-print( mean( prs.prime[ y.prime>K ] ) )
-print( sqrt(fit$r.squared) * mean( y.prime[ y.prime>K ] ) / sigma.y - mu.y / sigma.y )
-print( sqrt(fit$r.squared) * (mu.y + sigma.y*dnorm(K.prime)/pnorm(K.prime,lower.tail=FALSE)) / sigma.y - mu.y / sigma.y )
+#print( mean( prs.prime[ y.prime>K ] ) )
+#print( sqrt(fit$r.squared) * mean( y.prime[ y.prime>K ] ) / sigma.y - mu.y / sigma.y )
+#print( sqrt(fit$r.squared) * (mu.y + sigma.y*dnorm(K.prime)/pnorm(K.prime,lower.tail=FALSE)) / sigma.y - mu.y / sigma.y )
 mu.y = 0
 K.prime = (K - mu.y)/sigma.y
-print( sqrt(fit$r.squared) * (mu.y + sigma.y*dnorm(K.prime)/pnorm(K.prime,lower.tail=FALSE)) / sigma.y - mu.y / sigma.y )
+#print( sqrt(fit$r.squared) * (mu.y + sigma.y*dnorm(K.prime)/pnorm(K.prime,lower.tail=FALSE)) / sigma.y - mu.y / sigma.y )
 mu.y = mean(y.prime)
 sigma.y = 1
 K.prime = (K - mu.y)/sigma.y
-print( sqrt(fit$r.squared) * (mu.y + sigma.y*dnorm(K.prime)/pnorm(K.prime,lower.tail=FALSE)) / sigma.y - mu.y / sigma.y )
+#print( sqrt(fit$r.squared) * (mu.y + sigma.y*dnorm(K.prime)/pnorm(K.prime,lower.tail=FALSE)) / sigma.y - mu.y / sigma.y )
 mu.y = 0
 sigma.y = 1
 K.prime = (K - mu.y)/sigma.y
-print( sqrt(fit$r.squared) * (mu.y + sigma.y*dnorm(K.prime)/pnorm(K.prime,lower.tail=FALSE)) / sigma.y - mu.y / sigma.y )
+#print( sqrt(fit$r.squared) * (mu.y + sigma.y*dnorm(K.prime)/pnorm(K.prime,lower.tail=FALSE)) / sigma.y - mu.y / sigma.y )
 
 #print( r * ( mean( y.prime[y.prime>2] ) - mean(y.prime) ) )
 #print( mean( prs.prime[y.prime>2] ) )
