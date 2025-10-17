@@ -1,3 +1,4 @@
+source('functions.R')
 source('function_h2.R')
 n <- 2e5
 h2.common <- 0.4
