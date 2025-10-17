@@ -1,4 +1,4 @@
-source('scripts/function.R')
+source('function_h2.R')
 n <- 2e5
 h2.common <- 0.4
 #h2.rare <- 0.2
@@ -40,22 +40,22 @@ for( i in 1:iter ){
 #    m.yprime <- 0
     fit <- summary(lm( yyy ~ I(prs1) ))
     test <- prs.test( (prs1), yyy )
-    p.in.tail1 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=mu.y )
+    p.in.tail1 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
     ex1 <- h2.rare.big( p.in.tail1, beta=beta.assumed )
 
     fit <- summary(lm( yyy ~ I(prs2) ))
     test <- prs.test( (prs2), yyy )
-    p.in.tail2 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
+    p.in.tail2 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
     ex2 <- h2.rare.big( p.in.tail2, beta=beta.assumed )
 
     fit <- summary(lm( yyy ~ I(prs1+rare.effects1) ))
     test <- prs.test( (prs1+rare.effects1), yyy )
-    p.in.tail3 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
+    p.in.tail3 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
     ex3 <- h2.rare.big( p.in.tail3, beta=beta.assumed )
 
     fit <- summary(lm( yyy ~ I(prs2+rare.effects1) ))
     test <- prs.test( (prs2+rare.effects1), yyy )
-    p.in.tail4 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu=m.yprime )
+    p.in.tail4 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
     ex4 <- h2.rare.big( p.in.tail4, beta=beta.assumed )
 
 #    print( c( p.in.tail1, p.in.tail2, p.in.tail3, p.in.tail4 ) )
