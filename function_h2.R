@@ -157,7 +157,7 @@ sim <- function( n, m, rare.maf, beta, prs.r2, centre.reg=NULL ){
     return( ret )
 }
 
-est.prop.in.tail2 <- function( effect.size, beta, r, tail=0.01 ){
+est.prop.in.tail.old <- function( effect.size, beta, r, tail=0.01 ){
     kappa <- qnorm( tail, lower.tail=FALSE )
     percentile.pushed.to.tail <- pnorm(beta-kappa)
     prop.in.tail <- c(0,0)
