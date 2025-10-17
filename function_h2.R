@@ -65,13 +65,11 @@ var.explained <- function(data,ptr){
     return(R2)
 }
 
-est.prop.in.tail <- function( effect.size, beta, r2, tail=0.01, mu=0 ){
+est.prop.in.tail <- function( effect.size, beta, r2, tail=0.01 ){
     percentile.pushed.to.tail <- vector()
     prop.in.tail <- c(0,0)
     kappa <- qnorm( tail, lower.tail=FALSE )
-    sign <- 1
     for( i in 1:2 ){
-        sign <- -sign
         percentile.pushed.to.tail[i] <- pnorm( beta - kappa  )
         Z1 <- qnorm( percentile.pushed.to.tail[i], lower.tail=FALSE )
         Z0 <- qnorm( tail, lower.tail=FALSE )
@@ -85,7 +83,7 @@ est.prop.in.tail <- function( effect.size, beta, r2, tail=0.01, mu=0 ){
     return( prop.in.tail )
 }
 
-est.prop.in.tail <- function( effect.size, beta, r2, tail=0.01, mu.y=0, sigma.y=1 ){
+est.prop.in.tail2 <- function( effect.size, beta, r2, tail=0.01, mu.y=0, sigma.y=1 ){
     percentile.pushed.to.tail <- vector()
     prop.in.tail <- c(0,0)
     K <- qnorm( tail, lower.tail=FALSE )
