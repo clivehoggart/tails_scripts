@@ -83,28 +83,6 @@ est.prop.in.tail <- function( effect.size, beta, r2, tail=0.01 ){
     return( prop.in.tail )
 }
 
-est.prop.in.tail2 <- function( effect.size, beta, r2, tail=0.01, mu.y=0, sigma.y=1 ){
-    r = sqrt(r2)
-    percentile.pushed.to.tail <- vector()
-    prop.in.tail <- c(0,0)
-    K <- qnorm( tail, lower.tail=FALSE )
-    K.prime = vector()
-    K.prime.rare = vector()
-    K.prime[1] = (-K - mu.y)/sigma.y
-    K.prime[2] = (K - mu.y)/sigma.y
-    K.prime.rare[1] = (-K + beta - mu.y)/sigma.y
-    K.prime.rare[2] = (K - beta - mu.y)/sigma.y
-    for( i in 1:2 ){
-        tail = ifelse( i==1, TRUE, FALSE )
-        m.Y99.rare <- r * dnorm( K.prime.rare[i] )/pnorm( K.prime.rare[i], lower.tail=tail ) - (1 - r) * mu.y / sigma.y
-        m.Y99 <- r * dnorm( K.prime[i] )/pnorm( K.prime[i], lower.tail=tail ) - (1 - r) * mu.y / sigma.y
-        if( effect.size[i]>0 ){
-            prop.in.tail[i] <- effect.size[i] / ( m.Y99 - m.Y99.rare )
-        }
-    }
-    return( prop.in.tail )
-}
-
 h2.rare.big <- function( prop.in.tail,  tail=0.01, rare.maf=1e-4, beta ){
 # beta -- presumed effect size of rare large effect variants
     kappa <- qnorm( tail, lower.tail=FALSE )
@@ -127,20 +105,139 @@ h2.rare.big <- function( prop.in.tail,  tail=0.01, rare.maf=1e-4, beta ){
     return(as.list(ret))
 }
 
-sim.pheno <- function( n, m, rare.maf, beta, prs.r2 ){
-    rare.genos <- matrix( ncol=2, nrow=n, data=0 )
-    rare.effects <- matrix( ncol=2, nrow=n, data=0 )
+
+est.prop.in.tail2 <- function( effect.size, beta, r2, tail=0.01, mu.y=0, sigma.y=1 ){
+    r = sqrt(r2)
+    percentile.pushed.to.tail <- vector()
+    prop.in.tail <- c(0,0)
+    K <- qnorm( tail, lower.tail=FALSE )
+    K.prime = vector()
+    K.prime.rare = vector()
+    K.prime[1] = (-K - mu.y)/sigma.y
+    K.prime[2] = (K - mu.y)/sigma.y
+    K.prime.rare[1] = (-K + beta - mu.y)/sigma.y
+    K.prime.rare[2] = (K - beta - mu.y)/sigma.y
     for( i in 1:2 ){
-        if( m[i]>0 ){
-            rare.genos[,i] <- apply( replicate( m[i], rbinom( n, 2, rare.maf ) ), 1, sum )
-            rare.effects[,i] <- rare.genos[,i] * beta * (-1)^i
+        tail = ifelse( i==1, TRUE, FALSE )
+        m.Y99.rare <- r * dnorm( K.prime.rare[i] )/ pnorm( K.prime.rare[i], lower.tail=tail )
+        m.Y99 <- r * dnorm( K.prime[i] ) / pnorm( K.prime[i], lower.tail=tail )
+        if( effect.size[i]>0 ){
+            prop.in.tail[i] <- effect.size[i] / ( m.Y99 - m.Y99.rare )
         }
     }
-    sum.rare <- apply( rare.effects, 1, sum )
-    prs <- rnorm(n)*sqrt(prs.r2)
-    y <- rnorm(n)*sqrt(1-prs.r2-var(sum.rare)) + prs + sum.rare
-    y <- y - mean(y)
-    return( cbind( y, sum.rare ) )
+    return( prop.in.tail )
+}
+
+h2.rare.big2 <- function( prop.in.tail, tail=0.01, rare.maf=1e-4, beta, mu.y=0, sigma.y=1 ){
+# beta -- presumed effect size of rare large effect variants
+    K <- qnorm( tail, lower.tail=FALSE )
+    K.prime = vector()
+    K.prime.rare = vector()
+    K.prime[1] = (-K - mu.y)/sigma.y
+    K.prime[2] = (K - mu.y)/sigma.y
+    K.prime.rare[1] = (-K + beta - mu.y)/sigma.y
+    K.prime.rare[2] = (K - beta - mu.y)/sigma.y
+
+    sum.rare.freq <- vector()
+    var.rare <- vector()
+    m <- vector()
+    for( i in 1:2 ){
+        tail = ifelse( i==1, TRUE, FALSE )
+        sum.rare.freq[i] <- prop.in.tail[i]*pnorm( K.prime[i], lower.tail=tail ) /
+            ( prop.in.tail[i]*pnorm( K.prime[i], lower.tail=tail ) +
+              (1-prop.in.tail[i])*pnorm( K.prime.rare[i], lower.tail=tail ) )
+        m[i] <- 0.5*sum.rare.freq[i] / rare.maf # number of rare large effect variants
+        var.rare[i] <- m[i] * 2*rare.maf*(1-rare.maf) * beta^2
+    }
+
+    h2 <- sum(var.rare) / (1+sum(var.rare))
+    ret <- c( h2, sum.rare.freq, m )
+    names(ret) <- c( 'h2', 'sum.rare.freq1', 'sum.rare.freq2',
+                    'm1', 'm2' )
+    return(as.list(ret))
+}
+
+h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare.maf=1e-4, tail=0.01 ){
+    ret <- matrix(ncol=5,nrow=0)
+    colnames(ret) <- c( 'h2', 'sum.rare.freq1', 'sum.rare.freq2',
+                    'm1', 'm2' )
+    p.in.tail <- est.prop.in.tail2( test[,'effect'], beta=beta, r2=prs.r2 )
+    ex <- h2.rare.big2( p.in.tail, beta=beta, rare.maf=rare.maf, tail=tail )
+    sim.data <- sim.pheno( n=n, m1=ex$m1, m2=ex$m2, rare.maf=rare.maf, beta=beta,
+                          h2.common=h2.common, prs.r2=prs.r2, sd.beta=sd.beta )
+    for( i in 1:15 ){
+        p.in.tail <- est.prop.in.tail.emp( test[,'effect'], beta,
+                                           y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
+        ex <- h2.rare.big.emp( p.in.tail, beta=beta,
+                            y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
+        sim.data <- sim.pheno( n=n, m1=ex$m1, m2=ex$m2, rare.maf=rare.maf, beta=beta,
+                              h2.common=h2.common, prs.r2=prs.r2, sd.beta=sd.beta )
+        if( i>5 ){
+            ret <- rbind( ret, unlist(ex) )
+        }
+    }
+    return( apply( ret, 2, mean ) )
+}
+
+est.prop.in.tail.emp <- function( effect.size, beta, tail=0.01, y.prime, prs ){
+    kappa <- qnorm( tail, lower.tail=FALSE )
+    prop.in.tail <- c(0,0)
+
+    m.Y99 <- mean( prs[ y.prime < -kappa ] )
+    m.Y99.rare <- mean( prs[ y.prime < (-kappa+beta) ] )
+    prop.in.tail[1] <- -effect.size[1] / ( m.Y99 - m.Y99.rare ) # negative since forced +ve effect for tail
+
+    m.Y99 <- mean( prs[ y.prime > kappa ] )
+    m.Y99.rare <- mean( prs[ y.prime > (kappa-beta) ] )
+    prop.in.tail[2] <- effect.size[2] / ( m.Y99 - m.Y99.rare )
+
+    return( prop.in.tail )
+}
+
+h2.rare.big.emp <- function( prop.in.tail,  tail=0.01, rare.maf=1e-4, beta, y.prime, prs ){
+# beta -- presumed effect size of rare large effect variants
+    kappa <- qnorm( tail, lower.tail=FALSE )
+
+    sum.rare.freq <- vector()
+    var.rare <- vector()
+    m <- vector()
+
+    sum.rare.freq[1] <- prop.in.tail[1]*mean( y.prime < -kappa ) /
+        ( prop.in.tail[1]*mean( y.prime < -kappa ) + (1-prop.in.tail[1])*mean( y.prime<(-kappa+beta) ) )
+    sum.rare.freq[2] <- prop.in.tail[2]*mean( y.prime > kappa ) /
+        ( prop.in.tail[2]*mean( y.prime > kappa ) + (1-prop.in.tail[2])*mean( y.prime>(kappa-beta) ) )
+
+    for( i in 1:2 ){
+        m[i] <- 0.5*sum.rare.freq[i] / rare.maf # number of rare large effect variants
+        var.rare[i] <- m[i] * 2*rare.maf*(1-rare.maf) * beta^2
+    }
+
+    h2 <- sum(var.rare) / (1+sum(var.rare))
+    ret <- c( h2, sum.rare.freq, m )
+    names(ret) <- c( 'h2', 'sum.rare.freq1', 'sum.rare.freq2',
+                    'm1', 'm2' )
+    return(as.list(ret))
+}
+
+sim.pheno <- function( n, m1, m2, rare.maf, beta, h2.common, prs.r2, sd.beta=0 ){
+    m1 <- ifelse( m1<2, 2, m1 )
+    m2 <- ifelse( m2<2, 2, m2 )
+    common.effects <- sqrt(h2.common) * rnorm( n=n )
+    rare.effects1 <- apply(replicate( n, rnorm( m1, -beta, sd.beta ) * rbinom(n=m1,p=rare.maf,size=2)), 2, sum )
+    rare.effects2 <- apply(replicate( n, rnorm( m2, beta, sd.beta ) * rbinom(n=m2,p=rare.maf,size=2)), 2, sum )
+    h2.env <- 1 - h2.common - var(rare.effects1) - var(rare.effects2)
+    env <- sqrt(h2.env) * rnorm( n=n )
+    y <- common.effects + rare.effects1 + rare.effects2 + env
+    yy <- quantile.normalise(y)
+    prs.e <- h2.common * ( h2.common / prs.r2 - 1 )
+    prs <- common.effects + sqrt(prs.e) * rnorm( n=n )
+    prs <- prs / sd(prs)
+
+    ptr <- which( rare.effects1==0 & rare.effects2==0 )
+    y.prime <- yy[ptr]
+    prs.prime <- prs[ptr]
+
+    return( list( data.frame( yy, prs ) , data.frame( y.prime, prs.prime ) ) )
 }
 
 sim <- function( n, m, rare.maf, beta, prs.r2, centre.reg=NULL ){
@@ -175,7 +272,7 @@ est.prop.in.tail.old <- function( effect.size, beta, r, tail=0.01 ){
     return( prop.in.tail )
 }
 
-h2.rare.big2 <- function( prop.in.tail,  tail=0.01, rare.maf=1e-4, beta ){
+h2.rare.big.old <- function( prop.in.tail,  tail=0.01, rare.maf=1e-4, beta ){
 # beta -- presumed effect size of rare large effect variants
     kappa <- qnorm( tail, lower.tail=FALSE )
     percentile.pushed.to.tail <- pnorm(beta-kappa)
