@@ -15,17 +15,17 @@ iter <- 20
 h2.est1 <- matrix( nrow=iter, ncol=5 )
 
 rare.maf <- 1e-4
-n.rare.effects1 <- 20
-n.rare.effects2 <- 20
+n.rare.effects1 <- 40
+n.rare.effects2 <- 1
 
 for( i in 1:iter ){
     common.effects <- sqrt(h2.common) * rnorm( n=n )
-    rare.effects1 <- apply(replicate( n,
-                                     rnorm( n.rare.effects1, -beta.real, 0 ) *
-                                     rbinom(n=n.rare.effects1,p=rare.maf,size=2)), 2, sum )
-    rare.effects2 <- apply(replicate( n,
-                                     rnorm( n.rare.effects2, beta.real, 0 ) *
-                                     rbinom(n=n.rare.effects2,p=rare.maf,size=2)), 2, sum )
+    rare.effects1 <- apply(matrix(ncol=n,data=replicate( n,
+                                                        rnorm( n.rare.effects1, -beta.real, 0 ) *
+                                                        rbinom(n=n.rare.effects1,p=rare.maf,size=2))), 2, sum )
+    rare.effects2 <- apply(matrix(ncol=n,data=replicate( n,
+                                                        rnorm( n.rare.effects2, beta.real, 0 ) *
+                                                        rbinom(n=n.rare.effects2,p=rare.maf,size=2))), 2, sum )
 #    if( symm ){
 #        rare.effects1 <- (2*rbinom( n=n, p=0.99, size=1 ) - 1) * rare.effects1 # captured rare effects
 #        rare.effects2 <- (2*rbinom( n=n, p=0.99, size=1 ) - 1) * rare.effects2 # missed rare effects

@@ -1,4 +1,5 @@
 library(data.table)
+source('~/bin/functions.R')
 source('~/tails_scripts/functions.R')
 source('~/tails_scripts/function_h2.R')
 x <- fread('~/tails/results/tade_exome_results.txt')
