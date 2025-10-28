@@ -161,12 +161,14 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
     ret <- matrix(ncol=5,nrow=0)
     colnames(ret) <- c( 'h2', 'sum.rare.freq1', 'sum.rare.freq2',
                     'm1', 'm2' )
-    p.in.tail <- est.prop.in.tail2( test[,'effect'], beta=beta, r2=prs.r2 )
+    p.in.tail <- est.prop.in.tail2( effect.size, beta=beta, r2=prs.r2 )
+    p.in.tail <- ifelse( p.in.tail<0, 0, p.in.tail )
+    p.in.tail <- ifelse( p.in.tail>1, 1, p.in.tail )
     ex <- h2.rare.big2( p.in.tail, beta=beta, rare.maf=rare.maf, tail=tail )
     sim.data <- sim.pheno( n=n, m1=ex$m1, m2=ex$m2, rare.maf=rare.maf, beta=beta,
                           h2.common=h2.common, prs.r2=prs.r2, sd.beta=sd.beta )
     for( i in 1:15 ){
-        p.in.tail <- est.prop.in.tail.emp( test[,'effect'], beta,
+        p.in.tail <- est.prop.in.tail.emp( effect.size, beta,
                                            y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
         ex <- h2.rare.big.emp( p.in.tail, beta=beta,
                             y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
@@ -237,7 +239,7 @@ sim.pheno <- function( n, m1, m2, rare.maf, beta, h2.common, prs.r2, sd.beta=0 )
     y.prime <- yy[ptr]
     prs.prime <- prs[ptr]
 
-    return( list( data.frame( yy, prs ) , data.frame( y.prime, prs.prime ) ) )
+    return( list( data.frame( y, yy, prs, rare.effects1, rare.effects2 ) , data.frame( y.prime, prs.prime ) ) )
 }
 
 sim <- function( n, m, rare.maf, beta, prs.r2, centre.reg=NULL ){

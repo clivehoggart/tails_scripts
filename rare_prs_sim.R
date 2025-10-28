@@ -7,7 +7,7 @@ h2.common <- 0.4
 #h2.env <- 1 - h2.rare - h2.common
 prs1.e <- 0.1
 prs2.e <- 10
-beta.real <- 2
+beta.real <- 3
 beta.assumed <- 3
 
 symm <- TRUE
@@ -71,10 +71,9 @@ for( i in 1:iter ){
                       beta=beta.assumed, sd.beta=0 ) )
 
 #    print( c( p.in.tail1, p.in.tail2, p.in.tail3, p.in.tail4 ) )
-    print( c( var(rare.effects1)+var(rare.effects2), ex1$h2, ex2$h2, ex3$h2, ex4$h2 ) )
-    h2.est1[i,] <- c( var(rare.effects1)+var(rare.effects2), ex1$h2, ex2$h2, ex3$h2, ex4$h2 )
+    print( c( 1-var(yy[ptr]), ex1$h2, ex2$h2, ex3$h2, ex4$h2 ) )
+    h2.est1[i,] <- c( 1-var(yy[ptr]), ex1$h2, ex2$h2, ex3$h2, ex4$h2 )
 }
-print( c( var(rare.effects1), var(rare.effects2), var(rare.effects1)+var(rare.effects2) ) )
 
 #    mean( yyy>2.3 & rare.effects2>0 ) / ( mean( y.prime>2.3-3 ) * rare.maf * 40 )
 
@@ -131,27 +130,29 @@ print( c( var(rare.effects1), var(rare.effects2), var(rare.effects1)+var(rare.ef
 #prs.test( (prs2+rare.effects1), yy )
 
 
-    mu.y=0
-    sigma.y=1
-    fit <- summary(lm( yyy ~ I(prs1) ))
-    test <- prs.test( (prs1), yyy )
-    p.in.tail3 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
-    ex3 <- h2.rare.big2( p.in.tail3, beta=beta.assumed, mu.y=mu.y, sigma.y=sigma.y  )
-    sim.data <- sim.pheno( n=n, m1=ex3$m1, m2=ex3$m2, rare.maf=1e-4, beta=beta.assumed,
-                          h2.common=h2.common, prs.r2=fit$r.squared, sd.beta=0 )
-    for( i in 1:3 ){
-        p.in.tail3 <- est.prop.in.tail.emp( test[,'effect'], beta.assumed,
-                                           y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
-        ex3 <- h2.rare.big.emp( p.in.tail3, beta=beta.assumed,
-                            y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
-        sim.data <- sim.pheno( n=n, m1=ex3$m1, m2=ex3$m2, rare.maf=1e-4, beta=beta.assumed,
-                              h2.common=h2.common, prs.r2=fit$r.squared, sd.beta=1 )
-        mu.y = mean(sim.data[[2]][,'y.prime'])
-        sigma.y = sd(sim.data[[2]][,'y.prime'])
-        fit.sim <- summary(lm( sim.data[[1]][,'yy'] ~ sim.data[[1]][,'prs'] ))
-        test.sim <- prs.test( sim.data[[1]][,'prs'], sim.data[[1]][,'yy'] )
-        print( signif( c( mu.y, sigma.y, ex3$h2, test.sim$effect, test.sim$p ), 3 ) )
-    }
+mu.y=0
+sigma.y=1
+
+delta <- 1.5
+fit <- summary(lm( yyy ~ I(prs1) ))
+test <- prs.test( (prs1), yyy )
+p.in.tail3 <- est.prop.in.tail2( test[,'effect'], (beta.assumed-delta), r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
+ex3 <- h2.rare.big2( p.in.tail3, beta=(beta.assumed-delta), mu.y=mu.y, sigma.y=sigma.y  )
+sim.data <- sim.pheno( n=n, m1=ex3$m1, m2=ex3$m2, rare.maf=1e-4, beta=(beta.assumed-delta),
+                      h2.common=h2.common, prs.r2=fit$r.squared, sd.beta=0 )
+for( i in 1:10 ){
+    p.in.tail3 <- est.prop.in.tail.emp( test[,'effect'], (beta.assumed-delta),
+                                       y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
+    ex3 <- h2.rare.big.emp( p.in.tail3, beta=(beta.assumed-delta),
+                           y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
+    sim.data <- sim.pheno( n=n, m1=ex3$m1, m2=ex3$m2, rare.maf=1e-4, beta=(beta.assumed-delta),
+                          h2.common=h2.common, prs.r2=fit$r.squared, sd.beta=1 )
+    mu.y = mean(sim.data[[2]][,'y.prime'])
+    sigma.y = sd(sim.data[[2]][,'y.prime'])
+    fit.sim <- summary(lm( sim.data[[1]][,'yy'] ~ sim.data[[1]][,'prs'] ))
+    test.sim <- prs.test( sim.data[[1]][,'prs'], sim.data[[1]][,'yy'] )
+    print( signif( c( mu.y, sigma.y, ex3$h2, test.sim$effect, test.sim$p ), 3 ) )
+}
 
 #    mu.y=0
 #    sigma.y=1
