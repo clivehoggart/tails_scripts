@@ -2,29 +2,29 @@ source('~/bin/functions.R')
 source('functions.R')
 source('function_h2.R')
 n <- 2e5
-h2.common <- 0.4
-#h2.rare <- 0.2
-#h2.env <- 1 - h2.rare - h2.common
-prs1.e <- 0.1
-prs2.e <- 10
-beta.real <- 3
-beta.assumed <- 3
+h2.common <- 0.3
+prs.r2.1 <- 0.15
+prs.r2.2 <- 0.1
+prs1.e <- h2.common * ( h2.common / prs.r2.1 - 1 )
+prs2.e <- h2.common * ( h2.common / prs.r2.2 - 1 )
+beta.real <- 2
+beta.assumed <- 2
 
 symm <- TRUE
-iter <- 20
+iter <- 1
 h2.est1 <- matrix( nrow=iter, ncol=5 )
 
 rare.maf <- 1e-4
 n.rare.effects1 <- 40
-n.rare.effects2 <- 1
+n.rare.effects2 <- 30
 
 for( i in 1:iter ){
     common.effects <- sqrt(h2.common) * rnorm( n=n )
     rare.effects1 <- apply(matrix(ncol=n,data=replicate( n,
-                                                        rnorm( n.rare.effects1, -beta.real, 0 ) *
+                                                        rnorm( n.rare.effects1, -beta.real, 1 ) *
                                                         rbinom(n=n.rare.effects1,p=rare.maf,size=2))), 2, sum )
     rare.effects2 <- apply(matrix(ncol=n,data=replicate( n,
-                                                        rnorm( n.rare.effects2, beta.real, 0 ) *
+                                                        rnorm( n.rare.effects2, beta.real, 1 ) *
                                                         rbinom(n=n.rare.effects2,p=rare.maf,size=2))), 2, sum )
 #    if( symm ){
 #        rare.effects1 <- (2*rbinom( n=n, p=0.99, size=1 ) - 1) * rare.effects1 # captured rare effects
@@ -52,6 +52,7 @@ for( i in 1:iter ){
 
     fit <- summary(lm( yyy ~ I(prs1) ))
     test <- prs.test( (prs1), yyy )
+    print(test)
     p.in.tail1 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
     ex1 <- h2.rare.big2( p.in.tail1, beta=beta.assumed, rare.maf=1e-4, mu.y=mu.y, sigma.y=sigma.y )
 
@@ -133,7 +134,7 @@ for( i in 1:iter ){
 mu.y=0
 sigma.y=1
 
-delta <- 1.5
+delta <- 0
 fit <- summary(lm( yyy ~ I(prs1) ))
 test <- prs.test( (prs1), yyy )
 p.in.tail3 <- est.prop.in.tail2( test[,'effect'], (beta.assumed-delta), r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
