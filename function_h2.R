@@ -175,10 +175,10 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
         p.in.tail <- ifelse( ( is.nan(p.in.tail) | p.in.tail<0 | p.in.tail>1 ) , p.in.tail2, p.in.tail )
         p.in.tail <- ifelse( p.in.tail<0, 0, p.in.tail )
         p.in.tail <- ifelse( p.in.tail>1, 1, p.in.tail )
-        print(unlist(p.in.tail))
+#        print(unlist(p.in.tail))
         ex <- h2.rare.big.emp( p.in.tail, beta=beta,
                               y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
-        print(unlist(ex))
+#        print(unlist(ex))
         m1 <- ifelse( ex$m1<0, 0, round(ex$m1) )
         m2 <- ifelse( ex$m2<0, 0, round(ex$m2) )
         sim.data <- sim.pheno( n=n, m1=m1, m2=m2, rare.maf=rare.maf, beta=beta,
