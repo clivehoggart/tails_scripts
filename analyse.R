@@ -57,9 +57,12 @@ for( i in 1:length(traits) ){
 #                p.in.tail.upper[i,j,k] <- p.in.tail[2]
 #                p.in.tail <- ifelse( p.in.tail>1, 1, p.in.tail )
 #                ex <- h2.rare.big( p.in.tail, beta=beta[j], rare.maf=1e-5 )
+#                ex <- mclapply( 1:iter, function(k){
+#                    h2.est.emp( n=1e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
+#                                      beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
                 ex <- mclapply( 1:iter, function(k){
-                    unlist(h2.est.emp( n=1e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
-                                      beta=beta[j], prs.r2=r2, h2.common=h2 ))}, mc.cores=20 )
+                    h2.est.emp( n=1e5, effect.size=c( lower.effect, upper.effect ),
+                                      beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
                 rare.h2[i,j,k] <- ex$h2
                 rare.lower[i,j,k] <- ex$m1
                 rare.upper[i,j,k] <- ex$m2
