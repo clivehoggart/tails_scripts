@@ -170,8 +170,10 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
     for( i in 1:15 ){
         p.in.tail <- est.prop.in.tail.emp( effect.size, beta,
                                            y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
+        print(unlist(p.in.tail))
         ex <- h2.rare.big.emp( p.in.tail, beta=beta,
-                            y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
+                              y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
+        print(unlist(ex))
         sim.data <- sim.pheno( n=n, m1=round(ex$m1), m2=round(ex$m2), rare.maf=rare.maf, beta=beta,
                               h2.common=h2.common, prs.r2=prs.r2, sd.beta=sd.beta )
         if( i>5 ){
@@ -202,7 +204,7 @@ h2.rare.big.emp <- function( prop.in.tail,  tail=0.01, rare.maf=1e-4, beta, y.pr
 
     sum.rare.freq <- vector()
     var.rare <- vector()
-    m <- vector()
+    m <- c(0,0)
 
     sum.rare.freq[1] <- prop.in.tail[1]*mean( y.prime < -kappa ) /
         ( prop.in.tail[1]*mean( y.prime < -kappa ) + (1-prop.in.tail[1])*mean( y.prime<(-kappa+beta) ) )
@@ -229,7 +231,7 @@ sim.pheno <- function( n, m1, m2, rare.maf, beta, h2.common, prs.r2, sd.beta=0 )
         rare.effects1 <- rep(0,n)
     }
     if( m2>0 ){
-        rare.effects2 <- apply( matrix(ncol=n,data=replicate( n, rnorm( m2, -beta, sd.beta ) * rbinom(n=m2,p=rare.maf,size=2))), 2, sum )
+        rare.effects2 <- apply( matrix(ncol=n,data=replicate( n, rnorm( m2, beta, sd.beta ) * rbinom(n=m2,p=rare.maf,size=2))), 2, sum )
     }else{
         rare.effects2 <- rep(0,n)
     }
