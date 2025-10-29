@@ -166,10 +166,16 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
     ex <- h2.rare.big2( p.in.tail, beta=beta, rare.maf=rare.maf, tail=tail )
     m1 <- ifelse( ex$m1<0, 0, round(ex$m1) )
     m2 <- ifelse( ex$m2<0, 0, round(ex$m2) )
+    while( 2 * rare.maf * (1-rare.maf) * (m1+m2) * beta^2 > 0.95 ){
+        m1 <- m1/2
+        m2 <- m2/2
+    }
+#    print( 2 * rare.maf * (1-rare.maf) * (m1+m2) * beta^2 )
     for( i in 1:15 ){
         m1.new <- 1e6
         m2.new <- 1e6
         while( h2.common + 2 * rare.maf * (1-rare.maf) * (m1.new+m2.new) * beta^2 > 0.95 ){
+#            print(c(m1,m2))
             sim.data <- sim.pheno( n=n, m1=m1, m2=m2, rare.maf=rare.maf, beta=beta,
                                   h2.common=h2.common, prs.r2=prs.r2, sd.beta=sd.beta )
             mu.y = mean(sim.data[[2]][,'y.prime'])
@@ -188,7 +194,11 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
 #        print(unlist(ex))
             m1.new <- ifelse( ex$m1<0, 0, round(ex$m1) )
             m2.new <- ifelse( ex$m2<0, 0, round(ex$m2) )
+            m1.new <- ifelse( is.na(ex$m1), 1e6, m1.new )
+            m2.new <- ifelse( is.na(ex$m2), 1e6, m2.new )
+#            print(c(m1.new,m2.new))
         }
+#        print( 2 * rare.maf * (1-rare.maf) * (m1.new+m2.new) * beta^2 )
         m1 <- m1.new
         m2 <- m2.new
         if( i>5 ){
