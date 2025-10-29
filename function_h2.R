@@ -159,8 +159,7 @@ h2.rare.big2 <- function( prop.in.tail, tail=0.01, rare.maf=1e-4, beta, mu.y=0, 
 
 h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare.maf=1e-4, tail=0.01 ){
     ret <- matrix(ncol=5,nrow=0)
-    colnames(ret) <- c( 'h2', 'sum.rare.freq1', 'sum.rare.freq2',
-                    'm1', 'm2' )
+    colnames(ret) <- c( 'h2', 'sum.rare.freq1', 'sum.rare.freq2', 'm1', 'm2' )
     p.in.tail <- est.prop.in.tail2( effect.size, beta=beta, r2=prs.r2 )
     p.in.tail <- ifelse( p.in.tail<0, 0, p.in.tail )
     p.in.tail <- ifelse( p.in.tail>1, 1, p.in.tail )
@@ -169,12 +168,20 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
                           h2.common=h2.common, prs.r2=prs.r2, sd.beta=sd.beta )
     for( i in 1:15 ){
         p.in.tail <- est.prop.in.tail.emp( effect.size, beta,
-                                           y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
-#        print(unlist(p.in.tail))
+                                          y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
+        mu.y <- mean( sim.data[[2]][,'y.prime'] )
+        sigma.y <- sd( sim.data[[2]][,'y.prime'] )
+        p.in.tail2 <- est.prop.in.tail2( effect.size, beta, r2=prs.r2, mu.y=mu.y, sigma.y=sigma.y )
+        p.in.tail <- ifelse( ( is.nan(p.in.tail) | p.in.tail<0 | p.in.tail>1 ) , p.in.tail2, p.in.tail )
+        p.in.tail <- ifelse( p.in.tail<0, 0, p.in.tail )
+        p.in.tail <- ifelse( p.in.tail>1, 1, p.in.tail )
+        print(unlist(p.in.tail))
         ex <- h2.rare.big.emp( p.in.tail, beta=beta,
                               y.prime=sim.data[[2]]$y.prime, prs=sim.data[[2]]$prs.prime )
-#        print(unlist(ex))
-        sim.data <- sim.pheno( n=n, m1=round(ex$m1), m2=round(ex$m2), rare.maf=rare.maf, beta=beta,
+        print(unlist(ex))
+        m1 <- ifelse( ex$m1<0, 0, round(ex$m1) )
+        m2 <- ifelse( ex$m2<0, 0, round(ex$m2) )
+        sim.data <- sim.pheno( n=n, m1=m1, m2=m2, rare.maf=rare.maf, beta=beta,
                               h2.common=h2.common, prs.r2=prs.r2, sd.beta=sd.beta )
         if( i>5 ){
             ret <- rbind( ret, unlist(ex) )
