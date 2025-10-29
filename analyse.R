@@ -22,6 +22,7 @@ just.common <- TRUE
 
 for( i in 1:length(traits) ){
     if( length(which( x$V1==traits[i] ))==9 ){
+        print(traits[i])
         tmp <- x$V5[which( x$V1==traits[i] & x$V2=="comboResult" )]
         r2 <- as.numeric(strsplit(tmp,',')[[1]][1])
         h2 <- as.numeric(strsplit( x.common$V3[i], '=' )[[1]][2])
@@ -62,10 +63,12 @@ for( i in 1:length(traits) ){
 #                                      beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
                 ex <- mclapply( 1:iter, function(k){
                     h2.est.emp( n=1e5, effect.size=c( lower.effect, upper.effect ),
-                                      beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
-                rare.h2[i,j,k] <- ex$h2
-                rare.lower[i,j,k] <- ex$m1
-                rare.upper[i,j,k] <- ex$m2
+                               beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
+                rare.h2[i,j,k] <- ex[[1]]['h2']
+                rare.lower[i,j,k] <- ex[[1]]['m1']
+                rare.upper[i,j,k] <- ex[[1]]['m2']
+                print(traits[i])
+                print(ex[[1]])
 #                theta.lower[i,j,k] <- p.in.tail[1]
 #                theta.upper[i,j,k] <- p.in.tail[2]
             }
