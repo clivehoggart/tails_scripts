@@ -197,8 +197,8 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
             m1.new <- ifelse( is.na(ex$m1), 1e6, m1.new )
             m2.new <- ifelse( is.na(ex$m2), 1e6, m2.new )
 #            print(c(m1.new,m2.new))
+            print( h2.common + 2 * rare.maf * (1-rare.maf) * (m1.new+m2.new) * beta^2 )
         }
-#        print( h2.common + 2 * rare.maf * (1-rare.maf) * (m1.new+m2.new) * beta^2 )
         m1 <- m1.new
         m2 <- m2.new
         if( i>5 ){
