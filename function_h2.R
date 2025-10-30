@@ -248,7 +248,15 @@ h2.rare.big.emp <- function( prop.in.tail,  tail=0.01, rare.maf=1e-4, beta, y.pr
     return(as.list(ret))
 }
 
-sim.pheno <- function( n, m1, m2, rare.maf, beta, h2.common, prs.r2, sd.beta=0 ){
+sim.pheno <- function( n, m1, m2, rare.maf, beta, h2.common, prs.r2, sd.beta=0, obs.prs.test ){
+
+#    while( test['lower','ci.lower'] < obs.prs.test['lower'] |
+#           test['lower','ci.upper'] > obs.prs.test['lower'] |
+#           test['upper','ci.lower'] < obs.prs.test['upper'] |
+#           test['upper','ci.upper'] > obs.prs.test['upper'] ){
+#               test <- prs.test()
+#    }
+
     common.effects <- sqrt(h2.common) * rnorm( n=n )
     if( m1>0 ){
         rare.effects1 <- apply( matrix(ncol=n,data=replicate( n, rnorm( m1, -beta, sd.beta ) * rbinom(n=m1,p=rare.maf,size=2))), 2, sum )
@@ -264,8 +272,15 @@ sim.pheno <- function( n, m1, m2, rare.maf, beta, h2.common, prs.r2, sd.beta=0 )
     env <- sqrt(h2.env) * rnorm( n=n )
     y <- common.effects + rare.effects1 + rare.effects2 + env
     yy <- quantile.normalise(y)
+
     prs.e <- h2.common * ( h2.common / prs.r2 - 1 )
     prs <- common.effects + sqrt(prs.e) * rnorm( n=n )
+    delta.prs.r2 <- cor( prs, yy )^2 - prs.r2
+    prs.ee <- prs.e / 10
+    while( delta.prs.r2>0.0005 ){
+        prs <- prs + sqrt(prs.ee) * rnorm( n=n )
+        delta.prs.r2 <- cor( prs, yy )^2 - prs.r2
+    }
     prs <- prs / sd(prs)
 
     ptr <- which( rare.effects1==0 & rare.effects2==0 )
