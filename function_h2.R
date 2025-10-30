@@ -166,7 +166,7 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
     ex <- h2.rare.big2( p.in.tail, beta=beta, rare.maf=rare.maf, tail=tail )
     m1 <- ifelse( ex$m1<0, 0, round(ex$m1) )
     m2 <- ifelse( ex$m2<0, 0, round(ex$m2) )
-    while( 2 * rare.maf * (1-rare.maf) * (m1+m2) * beta^2 > 0.95 ){
+    while( h2.common + 2 * rare.maf * (1-rare.maf) * (m1+m2) * beta^2 > 0.95 ){
         m1 <- m1/2
         m2 <- m2/2
     }
@@ -198,7 +198,7 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
             m2.new <- ifelse( is.na(ex$m2), 1e6, m2.new )
 #            print(c(m1.new,m2.new))
         }
-#        print( 2 * rare.maf * (1-rare.maf) * (m1.new+m2.new) * beta^2 )
+#        print( h2.common + 2 * rare.maf * (1-rare.maf) * (m1.new+m2.new) * beta^2 )
         m1 <- m1.new
         m2 <- m2.new
         if( i>5 ){
@@ -272,6 +272,7 @@ sim.pheno <- function( n, m1, m2, rare.maf, beta, h2.common, prs.r2, sd.beta=0, 
     env <- sqrt(h2.env) * rnorm( n=n )
     y <- common.effects + rare.effects1 + rare.effects2 + env
     yy <- quantile.normalise(y)
+
 
     prs.e <- h2.common * ( h2.common / prs.r2 - 1 )
     prs <- common.effects + sqrt(prs.e) * rnorm( n=n )
