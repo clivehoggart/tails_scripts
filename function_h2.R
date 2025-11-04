@@ -173,7 +173,7 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
     }
     m1.i <- m1
     m2.i <- m2
-    for( i in 1:n.sample ){
+    for( i in 1:n.samples ){
 #        print(i)
         m1.new <- 1e6
         m2.new <- 1e6
