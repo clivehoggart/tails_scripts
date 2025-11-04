@@ -1,5 +1,5 @@
 library(data.table)
-library(paralllel)
+library(parallel)
 source('~/bin/functions.R')
 source('~/tails_scripts/functions.R')
 source('~/tails_scripts/function_h2.R')
