@@ -1,4 +1,5 @@
 library(data.table)
+library(paralllel)
 source('~/bin/functions.R')
 source('~/tails_scripts/functions.R')
 source('~/tails_scripts/function_h2.R')
@@ -9,6 +10,7 @@ colnames(x.se)[c(1,4,5,6,7)] <- c("trait","lower.se.common", "upper.se.common","
 traits <- unique(x$V1)
 iter <- 1
 beta <- c( 1.5, 2, 3 )
+rare.maf <- c( 1e-4, 1e-5, 1e-5 )
 rare.h2 <- array( dim=c( length(traits), length(beta), iter ) )
 rare.lower <- array( dim=c( length(traits), length(beta), iter ) )
 rare.upper <- array( dim=c( length(traits), length(beta), iter ) )
@@ -21,7 +23,10 @@ x.common <- x.common[match(traits,x.common$V1),]
 just.common <- TRUE
 ex <- list()
 
-for( i in 1:length(traits) ){
+args <- commandArgs(trailingOnly=TRUE)
+i <- as.numeric(args[1])
+
+#for( i in 1:length(traits) ){
     if( length(which( x$V1==traits[i] ))==9 ){
         print(traits[i])
         tmp <- x$V5[which( x$V1==traits[i] & x$V2=="comboResult" )]
@@ -64,7 +69,7 @@ for( i in 1:length(traits) ){
 #                                      beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
         ex[[i]] <- mclapply( 1:3, function(j){
             h2.est.emp( n=2e5, effect.size=c( lower.effect, upper.effect ),
-                       prs.r2=r2, h2.common=h2, beta=beta[j], sd.beta=0 )}, mc.cores=3 )
+                       prs.r2=r2, h2.common=h2, rare.maf=rare.maf[j], beta=beta[j], sd.beta=0 )}, mc.cores=3 )
         print( apply( ex[[i]][[1]], 2, mean ) )
         print( apply( ex[[i]][[2]], 2, mean ) )
         print( apply( ex[[i]][[3]], 2, mean ) )
@@ -84,87 +89,95 @@ for( i in 1:length(traits) ){
 #            }
 #        }
     }
-}
+#}
 
-out20 <- matrix(ncol=13,nrow=length(traits))
-out30 <- matrix(ncol=13,nrow=length(traits))
-out40 <- matrix(ncol=13,nrow=length(traits))
-out10 <- matrix(ncol=13,nrow=length(traits))
-out05 <- matrix(ncol=13,nrow=length(traits))
-for( i in 1:length(traits) ){
-    if( length(which( x$V1==traits[i] ))==9 ){
-        out20[i,] <- c( round( quantile( rare.h2[i,1,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.lower[i,1,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.upper[i,1,], c(0.5,0.025,0.975) ), 3),
-                       round( c( median(rare.lower[i,1,]), median(rare.upper[i,1,]) ), 1 ),
-                       round( c( mean(p.in.tail.lower[i,1,]<1),
-                                mean(p.in.tail.upper[i,1,]<1) ), 2 ))
+ex1 <- rbind( ex[[i]][[1]], apply( ex[[i]][[1]], 2, mean ) )
+ex2 <- rbind( ex[[i]][[2]], apply( ex[[i]][[2]], 2, mean ) )
+ex3 <- rbind( ex[[i]][[3]], apply( ex[[i]][[3]], 2, mean ) )
 
-        out30[i,] <- c( round( quantile( rare.h2[i,2,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.lower[i,2,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.upper[i,2,], c(0.5,0.025,0.975) ), 3),
-                       round( c( median(rare.lower[i,2,]), median(rare.upper[i,2,]) ), 1 ),
-                       round( c( mean(p.in.tail.lower[i,2,]<1),
-                                mean(p.in.tail.upper[i,2,]<1) ), 2 ))
+write.table( ex1, paste0("h2_rare_", traits[i], "_1.dat"), quote=F, row.names=F )
+write.table( ex2, paste0("h2_rare_", traits[i], "_2.dat"), quote=F, row.names=F )
+write.table( ex3, paste0("h2_rare_", traits[i], "_3.dat"), quote=F, row.names=F )
 
-        out40[i,] <- c( round( quantile( rare.h2[i,3,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.lower[i,3,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.upper[i,3,], c(0.5,0.025,0.975) ), 3),
-                       round( c( median(rare.lower[i,3,]), median(rare.upper[i,3,]) ), 1 ),
-                       round( c( mean(p.in.tail.lower[i,3,]<1),
-                                mean(p.in.tail.upper[i,3,]<1) ), 2 ))
+#out20 <- matrix(ncol=13,nrow=length(traits))
+#out30 <- matrix(ncol=13,nrow=length(traits))
+#out40 <- matrix(ncol=13,nrow=length(traits))
+#out10 <- matrix(ncol=13,nrow=length(traits))
+#out05 <- matrix(ncol=13,nrow=length(traits))
+#for( i in 1:length(traits) ){
+#    if( length(which( x$V1==traits[i] ))==9 ){
+#        out20[i,] <- c( round( quantile( rare.h2[i,1,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.lower[i,1,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.upper[i,1,], c(0.5,0.025,0.975) ), 3),
+#                       round( c( median(rare.lower[i,1,]), median(rare.upper[i,1,]) ), 1 ),
+#                       round( c( mean(p.in.tail.lower[i,1,]<1),
+#                                mean(p.in.tail.upper[i,1,]<1) ), 2 ))
 
-        out10[i,] <- c( round( quantile( rare.h2[i,4,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.lower[i,4,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.upper[i,4,], c(0.5,0.025,0.975) ), 3),
-                       round( c( median(rare.lower[i,4,]), median(rare.upper[i,4,]) ), 1 ),
-                       round( c( mean(p.in.tail.lower[i,4,]<1),
-                                mean(p.in.tail.upper[i,4,]<1) ), 2 ))
+#        out30[i,] <- c( round( quantile( rare.h2[i,2,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.lower[i,2,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.upper[i,2,], c(0.5,0.025,0.975) ), 3),
+#                       round( c( median(rare.lower[i,2,]), median(rare.upper[i,2,]) ), 1 ),
+#                       round( c( mean(p.in.tail.lower[i,2,]<1),
+#                                mean(p.in.tail.upper[i,2,]<1) ), 2 ))
 
-        out05[i,] <- c( round( quantile( rare.h2[i,5,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.lower[i,5,], c(0.5,0.025,0.975) ), 3),
-                       round( quantile( theta.upper[i,5,], c(0.5,0.025,0.975) ), 3),
-                       round( c( median(rare.lower[i,5,]), median(rare.upper[i,5,]) ), 1 ),
-                       round( c( mean(p.in.tail.lower[i,5,]<1),
-                                mean(p.in.tail.upper[i,5,]<1) ), 2 ))
-    }
-}
-out05 <- data.frame( traits, out05 )
-out10 <- data.frame( traits, out10 )
-out20 <- data.frame( traits, out20 )
-out30 <- data.frame( traits, out30 )
-out40 <- data.frame( traits, out40 )
-colnames(out05) <- c('trait','h2','h2.2.5%','h2.97.5%',
-                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
-                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
-                     'm.lt','m.ut','val.lt','val.ut')
-colnames(out10) <- c('trait','h2','h2.2.5%','h2.97.5%',
-                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
-                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
-                     'm.lt','m.ut','val.lt','val.ut')
-colnames(out20) <- c('trait','h2','h2.2.5%','h2.97.5%',
-                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
-                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
-                     'm.lt','m.ut','val.lt','val.ut')
-colnames(out30) <- c('trait','h2','h2.2.5%','h2.97.5%',
-                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
-                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
-                     'm.lt','m.ut','val.lt','val.ut')
-colnames(out40) <- c('trait','h2','h2.2.5%','h2.97.5%',
-                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
-                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
-                     'm.lt','m.ut','val.lt','val.ut')
+#        out40[i,] <- c( round( quantile( rare.h2[i,3,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.lower[i,3,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.upper[i,3,], c(0.5,0.025,0.975) ), 3),
+#                       round( c( median(rare.lower[i,3,]), median(rare.upper[i,3,]) ), 1 ),
+#                       round( c( mean(p.in.tail.lower[i,3,]<1),
+#                                mean(p.in.tail.upper[i,3,]<1) ), 2 ))
 
-if( !just.common ){
-    write.table( out05, "h2_rare_beta05.txt", quote=F, row.names=F )
-    write.table( out10, "h2_rare_beta1.txt", quote=F, row.names=F )
-    write.table( out20, "h2_rare_beta2.txt", quote=F, row.names=F )
-    write.table( out30, "h2_rare_beta3.txt", quote=F, row.names=F )
-    write.table( out40, "h2_rare_beta4.txt", quote=F, row.names=F )
-}else{
-    write.table( out05, "h2_rare_beta05_justcommon.txt", quote=F, row.names=F )
-    write.table( out10, "h2_rare_beta1_justcommon.txt", quote=F, row.names=F )
-    write.table( out20, "h2_rare_beta2_justcommon.txt", quote=F, row.names=F )
-    write.table( out30, "h2_rare_beta3_justcommon.txt", quote=F, row.names=F )
-    write.table( out40, "h2_rare_beta4_justcommon.txt", quote=F, row.names=F )
-}
+#        out10[i,] <- c( round( quantile( rare.h2[i,4,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.lower[i,4,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.upper[i,4,], c(0.5,0.025,0.975) ), 3),
+#                       round( c( median(rare.lower[i,4,]), median(rare.upper[i,4,]) ), 1 ),
+#                       round( c( mean(p.in.tail.lower[i,4,]<1),
+#                                mean(p.in.tail.upper[i,4,]<1) ), 2 ))
+
+#        out05[i,] <- c( round( quantile( rare.h2[i,5,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.lower[i,5,], c(0.5,0.025,0.975) ), 3),
+#                       round( quantile( theta.upper[i,5,], c(0.5,0.025,0.975) ), 3),
+#                       round( c( median(rare.lower[i,5,]), median(rare.upper[i,5,]) ), 1 ),
+#                       round( c( mean(p.in.tail.lower[i,5,]<1),
+#                                mean(p.in.tail.upper[i,5,]<1) ), 2 ))
+#    }
+#}
+#out05 <- data.frame( traits, out05 )
+#out10 <- data.frame( traits, out10 )
+#out20 <- data.frame( traits, out20 )
+#out30 <- data.frame( traits, out30 )
+#out40 <- data.frame( traits, out40 )
+#colnames(out05) <- c('trait','h2','h2.2.5%','h2.97.5%',
+#                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
+#                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
+#                     'm.lt','m.ut','val.lt','val.ut')
+#colnames(out10) <- c('trait','h2','h2.2.5%','h2.97.5%',
+#                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
+#                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
+#                     'm.lt','m.ut','val.lt','val.ut')
+#colnames(out20) <- c('trait','h2','h2.2.5%','h2.97.5%',
+#                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
+#                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
+#                     'm.lt','m.ut','val.lt','val.ut')
+#colnames(out30) <- c('trait','h2','h2.2.5%','h2.97.5%',
+#                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
+#                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
+#                     'm.lt','m.ut','val.lt','val.ut')
+#colnames(out40) <- c('trait','h2','h2.2.5%','h2.97.5%',
+#                     'theta.lt','theta.lt.2.5%','theta.lt.97.5%',
+#                     'theta.ut','theta.ut.2.5%','theta.ut.97.5%',
+#                     'm.lt','m.ut','val.lt','val.ut')
+
+#if( !just.common ){
+#    write.table( out05, "h2_rare_beta05.txt", quote=F, row.names=F )
+#    write.table( out10, "h2_rare_beta1.txt", quote=F, row.names=F )
+#    write.table( out20, "h2_rare_beta2.txt", quote=F, row.names=F )
+#    write.table( out30, "h2_rare_beta3.txt", quote=F, row.names=F )
+#    write.table( out40, "h2_rare_beta4.txt", quote=F, row.names=F )
+#}else{
+#    write.table( out05, "h2_rare_beta05_justcommon.txt", quote=F, row.names=F )
+#    write.table( out10, "h2_rare_beta1_justcommon.txt", quote=F, row.names=F )
+#    write.table( out20, "h2_rare_beta2_justcommon.txt", quote=F, row.names=F )
+#    write.table( out30, "h2_rare_beta3_justcommon.txt", quote=F, row.names=F )
+#    write.table( out40, "h2_rare_beta4_justcommon.txt", quote=F, row.names=F )
+#}

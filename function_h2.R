@@ -157,7 +157,7 @@ h2.rare.big2 <- function( prop.in.tail, tail=0.01, rare.maf=1e-4, beta, mu.y=0, 
     return(as.list(ret))
 }
 
-h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare.maf=1e-4, tail=0.01, iter.max=5 ){
+h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare.maf=1e-4, tail=0.01, n.samples=50, iter.max=5 ){
     good.sim <- FALSE
     ret <- matrix(ncol=6,nrow=0)
     colnames(ret) <- c( 'h2', 'sum.rare.freq1', 'sum.rare.freq2', 'm1', 'm2', 'iter' )
@@ -173,7 +173,7 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
     }
     m1.i <- m1
     m2.i <- m2
-    for( i in 1:20 ){
+    for( i in 1:n.sample ){
 #        print(i)
         m1.new <- 1e6
         m2.new <- 1e6
