@@ -49,7 +49,7 @@ prs.test <- function( prs1, y, K=0.01, tail="two" ){# Test for residuals mean=0 
     test <- t.test( fit$residual[ptr], alternative=alt )
     p2 <- test$p.value
     effect2 <- -test$estimate
-    ci2 <- -test$conf.int
+    ci2 <- c( -test$conf.int[2], -test$conf.int[1] )
     se2 <- test$stderr
 
     # Test lower tail "regression to mean"
