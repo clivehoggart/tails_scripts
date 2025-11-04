@@ -8,7 +8,7 @@ x.se <- fread('~/tails/results/SE_MATCH.txt')
 colnames(x.se)[c(1,4,5,6,7)] <- c("trait","lower.se.common", "upper.se.common","lower.se.combo", "upper.se.combo")
 traits <- unique(x$V1)
 iter <- 1
-beta <- c( 3, 4 )
+beta <- c( 1.5, 2, 3 )
 rare.h2 <- array( dim=c( length(traits), length(beta), iter ) )
 rare.lower <- array( dim=c( length(traits), length(beta), iter ) )
 rare.upper <- array( dim=c( length(traits), length(beta), iter ) )
@@ -19,6 +19,7 @@ p.in.tail.lower <- array( dim=c( length(traits), length(beta), iter ) )
 
 x.common <- x.common[match(traits,x.common$V1),]
 just.common <- TRUE
+ex <- list()
 
 for( i in 1:length(traits) ){
     if( length(which( x$V1==traits[i] ))==9 ){
@@ -52,7 +53,7 @@ for( i in 1:length(traits) ){
         upper.effect.sample <- ifelse( upper.effect.sample<0, 0, upper.effect.sample )
 
 #        for( k in 1:iter ){
-            for( j in 1:length(beta) ){
+#            for( j in 1:length(beta) ){
 #                p.in.tail <- est.prop.in.tail( c( lower.effect.sample[k], upper.effect.sample[k] ), beta=beta[j], r2=r2 )
 #                p.in.tail.lower[i,j,k] <- p.in.tail[1]
 #                p.in.tail.upper[i,j,k] <- p.in.tail[2]
@@ -61,19 +62,28 @@ for( i in 1:length(traits) ){
 #                ex <- mclapply( 1:iter, function(k){
 #                    h2.est.emp( n=1e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
 #                                      beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
-                ex <- mclapply( 1:iter, function(k){
-                    h2.est.emp( n=1e5, effect.size=c( lower.effect, upper.effect ),
-                               beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
-                rare.h2[i,j,k] <- ex[[1]]['h2']
-                rare.lower[i,j,k] <- ex[[1]]['m1']
-                rare.upper[i,j,k] <- ex[[1]]['m2']
-                print(traits[i])
-                print(ex[[1]])
+        ex[[i]] <- mclapply( 1:3, function(j){
+            h2.est.emp( n=2e5, effect.size=c( lower.effect, upper.effect ),
+                       prs.r2=r2, h2.common=h2, beta=beta[j], sd.beta=0 )}, mc.cores=3 )
+        print( apply( ex[[i]][[1]], 2, mean ) )
+        print( apply( ex[[i]][[2]], 2, mean ) )
+        print( apply( ex[[i]][[3]], 2, mean ) )
+
+#        ex1 <- h2.est.emp( n=2e5, effect.size=c( lower.effect, upper.effect ),
+#                       prs.r2=r2, h2.common=h2, beta=beta[1], sd.beta=0 )
+#        ex2 <- h2.est.emp( n=2e5, effect.size=c( lower.effect, upper.effect ),
+#                       prs.r2=r2, h2.common=h2, beta=beta[2], sd.beta=0 )
+#        ex3 <- h2.est.emp( n=2e5, effect.size=c( lower.effect, upper.effect ),
+#                       prs.r2=r2, h2.common=h2, beta=beta[3], sd.beta=0 )
+#                rare.h2[i,j,k] <- ex['h2']
+#                rare.lower[i,j,k] <- ex['m1']
+#                rare.upper[i,j,k] <- ex['m2']
+#                print(ex)
 #                theta.lower[i,j,k] <- p.in.tail[1]
 #                theta.upper[i,j,k] <- p.in.tail[2]
-            }
-        }
-#    }
+#            }
+#        }
+    }
 }
 
 out20 <- matrix(ncol=13,nrow=length(traits))
