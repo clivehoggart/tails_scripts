@@ -174,7 +174,7 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
     m1.i <- m1
     m2.i <- m2
     for( i in 1:20 ){
-        print(i)
+#        print(i)
         m1.new <- 1e6
         m2.new <- 1e6
         iter.sum <- 0
@@ -183,7 +183,7 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
             iter.sum <- iter.sum + 1
             sim.data <- sim.pheno( n=n, m1=m1, m2=m2, rare.maf=rare.maf, beta=beta,
                                   h2.common=h2.common, prs.r2=prs.r2, effect.size, sd.beta=sd.beta, tail=tail )
-            print(sim.data[[3]])
+#            print(sim.data[[3]])
             mu.y = mean(sim.data[[2]][,'y.prime'])
             sigma.y = sd(sim.data[[2]][,'y.prime'])
             p.in.tail <- est.prop.in.tail.emp( effect.size, beta, r2=prs.r2,
@@ -198,7 +198,7 @@ h2.est.emp <- function( n, effect.size, prs.r2, h2.common, beta, sd.beta=0, rare
             m2.new <- ifelse( ex$m2<0, 0, round(ex$m2) )
             m1.new <- ifelse( is.na(ex$m1), 1e6, m1.new )
             m2.new <- ifelse( is.na(ex$m2), 1e6, m2.new )
-            print(unlist(ex))
+#            print(unlist(ex))
 #            print( h2.common + 2 * rare.maf * (1-rare.maf) * (m1.new+m2.new) * beta.assumed^2 )
         }
         if( iter.sum==iter.max ){
