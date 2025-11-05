@@ -2,7 +2,7 @@ source('~/bin/functions.R')
 source('functions.R')
 source('function_h2.R')
 n <- 2e5
-n.sim <- 1e5
+n.sim <- 2e5
 h2.common <- 0.1258
 prs.r2.1 <- 0.025
 prs.r2.2 <- 0.05
@@ -17,7 +17,7 @@ rare.maf <- 1e-4
 
 # Gives age of menopause signal
 beta.real <- 4
-beta.assumed <- 2
+beta.assumed <- 4
 n.rare.effects1 <- 90
 n.rare.effects2 <- 20
 
@@ -75,22 +75,22 @@ for( i in 1:iter ){
     print(test)
     print(fit$r.squared)
     p.in.tail1 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
-    ex1 <- h2.rare.big2( p.in.tail1, beta=beta.assumed, rare.maf=1e-4, mu.y=mu.y, sigma.y=sigma.y )
+    ex1 <- h2.rare.big2( p.in.tail1, rare.maf=rare.maf, beta=beta.assumed, mu.y=mu.y, sigma.y=sigma.y )
 
     fit <- summary(lm( yyy ~ I(prs2) ))
     test <- prs.test( (prs2), yyy )
     p.in.tail2 <- est.prop.in.tail2( test[,'effect'], beta.assumed, r2=fit$r.squared, mu.y=mu.y, sigma.y=sigma.y )
-    ex2 <- h2.rare.big2( p.in.tail2, beta=beta.assumed, mu.y=mu.y, sigma.y=sigma.y )
+    ex2 <- h2.rare.big2( p.in.tail2, rare.maf=rare.maf, beta=beta.assumed, mu.y=mu.y, sigma.y=sigma.y )
 
     fit <- summary(lm( yyy ~ I(prs1) ))
     test <- prs.test( (prs1), yyy )
     ex3 <- h2.est.emp( n=n.sim, effect.size=test[,'effect'], prs.r2=fit$r.squared, h2.common=h2.common,
-                      beta=beta.assumed, sd.beta=0 )
+                      rare.maf=rare.maf, beta=beta.assumed, sd.beta=0 )
 
     fit <- summary(lm( yyy ~ I(prs2) ))
     test <- prs.test( (prs2), yyy )
     ex4 <- h2.est.emp( n=n.sim, effect.size=test[,'effect'], prs.r2=fit$r.squared, h2.common=h2.common,
-                      beta=beta.assumed, sd.beta=0 )
+                      rare.maf=rare.maf, beta=beta.assumed, sd.beta=0 )
 
 #    print( c( p.in.tail1, p.in.tail2, p.in.tail3, p.in.tail4 ) )
     print( c( var(rare.effects1) + var(rare.effects2), 1-var(yy[ptr]), ex1$h2, ex2$h2 ) )
