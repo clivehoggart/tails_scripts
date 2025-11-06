@@ -8,9 +8,10 @@ x.common <- fread('~/tails/results/CLIVE_REQUEST.txt',sep=' ')
 x.se <- fread('~/tails/results/SE_MATCH.txt')
 colnames(x.se)[c(1,4,5,6,7)] <- c("trait","lower.se.common", "upper.se.common","lower.se.combo", "upper.se.combo")
 traits <- unique(x$V1)
+traits <- c( 20015, 20256, 23105, 23106, 23129, 30000, 30010, 30020, 30040, 30060, 30070, 30090, 30120, 30130, 30140, 30150, 30180, 30190, 30200, 30210, 30240, 30250, 30260, 30270, 30280, 30600, 30630, 30680, 30690, 30700, 30740, 30750, 30770, 30810, 30830, 30850, 30860, 30870, 30890, 3143, 3144, 3148, 3581,  46,    50 )
 iter <- 1
-beta <- c( 1.5, 2, 3 )
-rare.maf <- c( 1e-4, 1e-5, 1e-5 )
+beta <- c( 2, 3 )
+rare.maf <- c( 1e-5, 1e-5 )
 rare.h2 <- array( dim=c( length(traits), length(beta), iter ) )
 rare.lower <- array( dim=c( length(traits), length(beta), iter ) )
 rare.upper <- array( dim=c( length(traits), length(beta), iter ) )
@@ -24,7 +25,9 @@ just.common <- TRUE
 ex <- list()
 
 args <- commandArgs(trailingOnly=TRUE)
-i <- as.numeric(args[1])
+ii <- as.numeric(args[1])
+i <- ceiling( ii / 100 )
+index <- ii - 100*(i-1)
 
 #for( i in 1:length(traits) ){
     if( length(which( x$V1==traits[i] ))==9 ){
@@ -67,12 +70,17 @@ i <- as.numeric(args[1])
 #                ex <- mclapply( 1:iter, function(k){
 #                    h2.est.emp( n=1e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
 #                                      beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
-        ex[[i]] <- mclapply( 1:3, function(j){
-            h2.est.emp( n=2e5, effect.size=c( lower.effect, upper.effect ),
-                       prs.r2=r2, h2.common=h2, rare.maf=rare.maf[j], beta=beta[j], sd.beta=0 )}, mc.cores=3 )
-        print( apply( ex[[i]][[1]], 2, mean ) )
-        print( apply( ex[[i]][[2]], 2, mean ) )
-        print( apply( ex[[i]][[3]], 2, mean ) )
+        ex2 <- mclapply( 1:10, function(k){
+            h2.est.emp( n=2e5, effect.size=c( lower.effect[k], upper.effect[k] ),
+                       prs.r2=r2, h2.common=h2,
+                       rare.maf=rare.maf[1], beta=beta[1], sd.beta=0 )}, mc.cores=10 )
+        ex3 <- mclapply( 1:10, function(k){
+            h2.est.emp( n=2e5, effect.size=c( lower.effect[k], upper.effect[k] ),
+                       prs.r2=r2, h2.common=h2,
+                       rare.maf=rare.maf[2], beta=beta[2], sd.beta=0 )}, mc.cores=10 )
+#        print( apply( ex[[i]][[1]], 2, mean ) )
+#        print( apply( ex[[i]][[2]], 2, mean ) )
+#        print( apply( ex[[i]][[3]], 2, mean ) )
 
 #        ex1 <- h2.est.emp( n=2e5, effect.size=c( lower.effect, upper.effect ),
 #                       prs.r2=r2, h2.common=h2, beta=beta[1], sd.beta=0 )
@@ -91,13 +99,11 @@ i <- as.numeric(args[1])
     }
 #}
 
-ex1 <- rbind( ex[[i]][[1]], apply( ex[[i]][[1]], 2, mean ) )
-ex2 <- rbind( ex[[i]][[2]], apply( ex[[i]][[2]], 2, mean ) )
-ex3 <- rbind( ex[[i]][[3]], apply( ex[[i]][[3]], 2, mean ) )
+ex2 <- apply( ex2, 2, mean ) )
+ex3 <- apply( ex3, 2, mean ) )
 
-write.table( ex1, paste0("h2_rare_", traits[i], "_1.dat"), quote=F, row.names=F )
-write.table( ex2, paste0("h2_rare_", traits[i], "_2.dat"), quote=F, row.names=F )
-write.table( ex3, paste0("h2_rare_", traits[i], "_3.dat"), quote=F, row.names=F )
+write.table( ex2, paste0("h2_rare_", traits[i], "_", index, "_2.dat"), quote=F, row.names=F )
+write.table( ex3, paste0("h2_rare_", traits[i], "_", index, "_3.dat"), quote=F, row.names=F )
 
 #out20 <- matrix(ncol=13,nrow=length(traits))
 #out30 <- matrix(ncol=13,nrow=length(traits))

@@ -1,6 +1,6 @@
 #BSUB -L /bin/sh
 #BSUB -n 3
-#BSUB -J CandT[1-74]
+#BSUB -J CandT[1-4600]
 #BSUB -R "span[hosts=1]"
 #BSUB -q premium
 #BSUB -W 1:00

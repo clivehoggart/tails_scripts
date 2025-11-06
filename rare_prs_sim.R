@@ -13,13 +13,13 @@ symm <- TRUE
 iter <- 1
 h2.est1 <- matrix( nrow=iter, ncol=6 )
 
-rare.maf <- 1e-4
+rare.maf <- 1e-5
 
 # Gives age of menopause signal
 beta.real <- 4
 beta.assumed <- 4
-n.rare.effects1 <- 90
-n.rare.effects2 <- 20
+n.rare.effects1 <- 900
+n.rare.effects2 <- 200
 
 #beta.real <- 3
 #beta.assumed <- 3
