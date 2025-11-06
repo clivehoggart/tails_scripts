@@ -29,35 +29,35 @@ i <- ceiling( ii / 100 )
 index <- ii - 100*(i-1)
 
 #for( i in 1:length(traits) ){
-    if( length(which( x$V1==traits[i] ))==9 ){
-        print(traits[i])
-        tmp <- x$V5[which( x$V1==traits[i] & x$V2=="comboResult" )]
-        r2 <- as.numeric(strsplit(tmp,',')[[1]][1])
-        h2 <- as.numeric(strsplit( x.common$V3[i], '=' )[[1]][2])
+if( length(which( x$V1==traits[i] ))==9 ){
+    print(traits[i])
+    tmp <- x$V5[which( x$V1==traits[i] & x$V2=="comboResult" )]
+    r2 <- as.numeric(strsplit(tmp,',')[[1]][1])
+    h2 <- as.numeric(strsplit( x.common$V3[i], '=' )[[1]][2])
 
-        ptr.se <- match( traits[i], x.se$trait )
-        if( !just.common ){
-            tmp <- x$V4[which( x$V1==traits[i] & x$V2=="comboTail:1%" )]
-            lower.effect <- as.numeric(strsplit(tmp,',')[[1]][1])
-            tmp <- x$V4[which( x$V1==traits[i] & x$V2=="comboTail:99%" )]
-            upper.effect <- as.numeric(strsplit(tmp,',')[[1]][1])
-            lower.effect <- ifelse( lower.effect<0, 0, lower.effect )
-            upper.effect <- ifelse( upper.effect<0, 0, upper.effect )
-            lower.se <- x.se$lower.se.combo[ptr.se]
-            upper.se <- x.se$upper.se.combo[ptr.se]
-        }else{
-            lower.effect <- as.numeric(strsplit( x.common$V4[i], ',' )[[1]][2])
-            upper.effect <- as.numeric(strsplit( x.common$V5[i], ',' )[[1]][2])
-            lower.se <- x.se$lower.se.common[ptr.se]
-            upper.se <- x.se$upper.se.common[ptr.se]
-        }
+    ptr.se <- match( traits[i], x.se$trait )
+    if( !just.common ){
+        tmp <- x$V4[which( x$V1==traits[i] & x$V2=="comboTail:1%" )]
+        lower.effect <- as.numeric(strsplit(tmp,',')[[1]][1])
+        tmp <- x$V4[which( x$V1==traits[i] & x$V2=="comboTail:99%" )]
+        upper.effect <- as.numeric(strsplit(tmp,',')[[1]][1])
+        lower.effect <- ifelse( lower.effect<0, 0, lower.effect )
+        upper.effect <- ifelse( upper.effect<0, 0, upper.effect )
+        lower.se <- x.se$lower.se.combo[ptr.se]
+        upper.se <- x.se$upper.se.combo[ptr.se]
+    }else{
+        lower.effect <- as.numeric(strsplit( x.common$V4[i], ',' )[[1]][2])
+        upper.effect <- as.numeric(strsplit( x.common$V5[i], ',' )[[1]][2])
+        lower.se <- x.se$lower.se.common[ptr.se]
+        upper.se <- x.se$upper.se.common[ptr.se]
+    }
 
-        combo.stats <- c( r2, lower.effect, upper.effect, lower.se, upper.se )
-        lower.effect.sample <- rnorm( n=iter, mean=lower.effect, sd=lower.se )
-        upper.effect.sample <- rnorm( n=iter, mean=upper.effect, sd=upper.se )
+    combo.stats <- c( r2, lower.effect, upper.effect, lower.se, upper.se )
+    lower.effect.sample <- rnorm( n=iter, mean=lower.effect, sd=lower.se )
+    upper.effect.sample <- rnorm( n=iter, mean=upper.effect, sd=upper.se )
 
-        lower.effect.sample <- ifelse( lower.effect.sample<0, 0, lower.effect.sample )
-        upper.effect.sample <- ifelse( upper.effect.sample<0, 0, upper.effect.sample )
+    lower.effect.sample <- ifelse( lower.effect.sample<0, 0, lower.effect.sample )
+    upper.effect.sample <- ifelse( upper.effect.sample<0, 0, upper.effect.sample )
 
 #        for( k in 1:iter ){
 #            for( j in 1:length(beta) ){
@@ -69,14 +69,14 @@ index <- ii - 100*(i-1)
 #                ex <- mclapply( 1:iter, function(k){
 #                    h2.est.emp( n=1e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
 #                                      beta=beta[j], prs.r2=r2, h2.common=h2 )}, mc.cores=20 )
-        ex2 <- mclapply( 1:iter, function(k){
-            h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
-                       prs.r2=r2, h2.common=h2,
-                       rare.maf=rare.maf[1], beta=beta[1], sd.beta=0, n.samples=10 )}, mc.cores=10 )
-        ex3 <- mclapply( 1:1ter, function(k){
-            h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
-                       prs.r2=r2, h2.common=h2,
-                       rare.maf=rare.maf[2], beta=beta[2], sd.beta=0 )}, mc.cores=10 )
+    ex2 <- mclapply( 1:iter, function(k){
+        h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
+                   prs.r2=r2, h2.common=h2,
+                   rare.maf=rare.maf[1], beta=beta[1], sd.beta=0 )}, mc.cores=10 )
+    ex3 <- mclapply( 1:1ter, function(k){
+        h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
+                   prs.r2=r2, h2.common=h2,
+                   rare.maf=rare.maf[2], beta=beta[2], sd.beta=0 )}, mc.cores=10 )
 #        print( apply( ex[[i]][[1]], 2, mean ) )
 #        print( apply( ex[[i]][[2]], 2, mean ) )
 #        print( apply( ex[[i]][[3]], 2, mean ) )
@@ -95,7 +95,7 @@ index <- ii - 100*(i-1)
 #                theta.upper[i,j,k] <- p.in.tail[2]
 #            }
 #        }
-    }
+}
 #}
 ex2 <- t(matrix( unlist(ex2), ncol=10 ))
 ex3 <- t(matrix( unlist(ex3), ncol=10 ))
