@@ -73,7 +73,7 @@ if( length(which( x$V1==traits[i] ))==9 ){
         h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
                    prs.r2=r2, h2.common=h2,
                    rare.maf=rare.maf[1], beta=beta[1], sd.beta=0 )}, mc.cores=10 )
-    ex3 <- mclapply( 1:1ter, function(k){
+    ex3 <- mclapply( 1:iter, function(k){
         h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
                    prs.r2=r2, h2.common=h2,
                    rare.maf=rare.maf[2], beta=beta[2], sd.beta=0 )}, mc.cores=10 )
