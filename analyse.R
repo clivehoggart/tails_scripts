@@ -76,7 +76,7 @@ if( length(which( x$V1==traits[i] ))==9 ){
     ex2 <- mclapply( 1:iter, function(k){
         h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
                    prs.r2=r2, h2.common=h2,
-                   rare.maf=rare.maf[1], beta=beta[1], sd.beta=0 )}, mc.cores=4 )
+                   rare.maf=rare.maf[1], beta=beta[1], sd.beta=0 )}, mc.cores=10 )
     ex3 <- mclapply( 1:iter, function(k){
         h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
                    prs.r2=r2, h2.common=h2,
@@ -106,8 +106,8 @@ ex3 <- t(matrix( unlist(ex3), ncol=10 ))
 #ex2 <- apply( ex2, 2, mean )
 #ex3 <- apply( ex3, 2, mean )
 
-write.table( ex2, paste0("h2_rare_", traits[i], "_", index, "_2.dat"), quote=F, row.names=F )
-write.table( ex3, paste0("h2_rare_", traits[i], "_", index, "_3.dat"), quote=F, row.names=F )
+write.table( ex2, paste0("~/tails_scripts/results_ci/h2_rare_", traits[i], "_", index, "_2.dat"), quote=F, row.names=F )
+write.table( ex3, paste0("~/tails_scripts/results_ci/h2_rare_", traits[i], "_", index, "_3.dat"), quote=F, row.names=F )
 
 #out20 <- matrix(ncol=13,nrow=length(traits))
 #out30 <- matrix(ncol=13,nrow=length(traits))
