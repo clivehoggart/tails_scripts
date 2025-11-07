@@ -23,10 +23,14 @@ p.in.tail.lower <- array( dim=c( length(traits), length(beta), iter ) )
 x.common <- x.common[match(traits,x.common$V1),]
 just.common <- TRUE
 
+#jobs <- fread('~/tails_scripts/minerva/tmp.txt')
+#jobs <- unlist(as.vector(jobs))
+#ii <- jobs[as.numeric(args[1])]
 args <- commandArgs(trailingOnly=TRUE)
 ii <- as.numeric(args[1])
 i <- ceiling( ii / 100 )
 index <- ii - 100*(i-1)
+
 
 #for( i in 1:length(traits) ){
 if( length(which( x$V1==traits[i] ))==9 ){
@@ -72,7 +76,7 @@ if( length(which( x$V1==traits[i] ))==9 ){
     ex2 <- mclapply( 1:iter, function(k){
         h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
                    prs.r2=r2, h2.common=h2,
-                   rare.maf=rare.maf[1], beta=beta[1], sd.beta=0 )}, mc.cores=10 )
+                   rare.maf=rare.maf[1], beta=beta[1], sd.beta=0 )}, mc.cores=4 )
     ex3 <- mclapply( 1:iter, function(k){
         h2.est.emp( n=2e5, effect.size=c( lower.effect.sample[k], upper.effect.sample[k] ),
                    prs.r2=r2, h2.common=h2,
@@ -99,8 +103,8 @@ if( length(which( x$V1==traits[i] ))==9 ){
 #}
 ex2 <- t(matrix( unlist(ex2), ncol=10 ))
 ex3 <- t(matrix( unlist(ex3), ncol=10 ))
-ex2 <- apply( ex2, 2, mean )
-ex3 <- apply( ex3, 2, mean )
+#ex2 <- apply( ex2, 2, mean )
+#ex3 <- apply( ex3, 2, mean )
 
 write.table( ex2, paste0("h2_rare_", traits[i], "_", index, "_2.dat"), quote=F, row.names=F )
 write.table( ex3, paste0("h2_rare_", traits[i], "_", index, "_3.dat"), quote=F, row.names=F )
@@ -187,3 +191,5 @@ write.table( ex3, paste0("h2_rare_", traits[i], "_", index, "_3.dat"), quote=F, 
 #    write.table( out30, "h2_rare_beta3_justcommon.txt", quote=F, row.names=F )
 #    write.table( out40, "h2_rare_beta4_justcommon.txt", quote=F, row.names=F )
 #}
+
+#BSUB -J CandT[1,10,100,1001,1002,1003,1004,1005,1006,1007,1008,1009,101,1010,1011,1012,1013,1014,1015,1016,1017]
