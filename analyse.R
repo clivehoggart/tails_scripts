@@ -21,7 +21,7 @@ p.in.tail.upper <- array( dim=c( length(traits), length(beta), iter ) )
 p.in.tail.lower <- array( dim=c( length(traits), length(beta), iter ) )
 
 x.common <- x.common[match(traits,x.common$V1),]
-just.common <- TRUE
+just.common <- FALSE
 
 #jobs <- fread('~/tails_scripts/minerva/tmp.txt')
 #jobs <- unlist(as.vector(jobs))
@@ -106,8 +106,8 @@ ex3 <- t(matrix( unlist(ex3), ncol=10 ))
 #ex2 <- apply( ex2, 2, mean )
 #ex3 <- apply( ex3, 2, mean )
 
-write.table( ex2, paste0("~/tails_scripts/results_ci/h2_rare_", traits[i], "_", index, "_2.dat"), quote=F, row.names=F )
-write.table( ex3, paste0("~/tails_scripts/results_ci/h2_rare_", traits[i], "_", index, "_3.dat"), quote=F, row.names=F )
+write.table( ex2, paste0("~/tails_scripts/results_fullPRS_ci/h2_rare_", traits[i], "_", index, "_2.dat"), quote=F, row.names=F )
+write.table( ex3, paste0("~/tails_scripts/results_fullPRS_ci/h2_rare_", traits[i], "_", index, "_3.dat"), quote=F, row.names=F )
 
 #out20 <- matrix(ncol=13,nrow=length(traits))
 #out30 <- matrix(ncol=13,nrow=length(traits))

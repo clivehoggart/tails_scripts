@@ -21,10 +21,10 @@ beta.assumed <- 4
 n.rare.effects1 <- 900
 n.rare.effects2 <- 200
 
-#beta.real <- 3
-#beta.assumed <- 3
-#n.rare.effects1 <- 50
-#n.rare.effects2 <- 50
+beta.real <- 2
+beta.assumed <- 2
+n.rare.effects1 <- 60
+n.rare.effects2 <- 4031
 
 for( i in 1:iter ){
     common.effects <- sqrt(h2.common) * rnorm( n=n )

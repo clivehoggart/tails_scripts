@@ -334,7 +334,7 @@ sim.pheno <- function( n, m1, m2, rare.maf, beta, h2.common, prs.r2, effect.size
     }
     prs <- prs / sd(prs)
     test <- prs.test( prs, yy )
-#    print(test)
+    print(test)
     good.sim <-
         ifelse( test['lower','ci.lower'] < effect.size[1]&effect.size[1] < test['lower','ci.upper'] &
                 test['upper','ci.lower'] < effect.size[2]&effect.size[2] < test['upper','ci.upper'],
